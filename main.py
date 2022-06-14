@@ -1,16 +1,39 @@
 import csv
 import ast
-from time import strftime
-
+import smtplib, ssl
 import requests
+import helper
 from bs4 import BeautifulSoup
 from os.path import exists
+from time import strftime
 
 supost_baseurl = "https://supost.com"
 search_url = supost_baseurl + "/search?&q="
 save_path = 'seen_ids.txt'
 
-search_for = ["sublet", "sublease", "https://supost.com/search/sub/66", "rent"]
+search_for = ["sublet", "sublease", "https://supost.com/search/sub/66", "rent", "sublicens"]
+
+config = helper.read_config()
+
+port = 587  # For starttls
+smtp_server = config['EmailSettings']['smtp_server']
+sender_email = config['EmailSettings']['sender_email']
+receiver_email = config['EmailSettings']['receiver_email']
+password = config['EmailSettings']['password']
+
+
+def send_results(data):
+    if len(data) < 1:
+        return None
+    message = "Hier die neuen, passenden Angebote:\n\n- " + '\n- '.join(data)
+
+    context = ssl.create_default_context()
+    with smtplib.SMTP(smtp_server, port) as server:
+        server.ehlo()  # Can be omitted
+        server.starttls(context=context)
+        server.ehlo()  # Can be omitted
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, message)
 
 
 def return_soup(url):
@@ -25,7 +48,7 @@ def return_soup(url):
     return soup
 
 
-kick_out_words = ["looking", "wanted", "seeking"]
+kick_out_words = ["looking", "wanted", "seeking", "need"]
 
 
 def scrape_post(url):
@@ -37,9 +60,14 @@ def scrape_post(url):
     price = soup.find("div", class_="item-price")
     if price is not None:
         price = price.contents[1].text
+        try:
+            if price == "free" or float(price[1:].replace(",", "")) < 800:
+                return None
+        except ValueError as e:
+            print(e)
     quarter = content.find("quarter") != -1 or title.find("quarter") != -1
     december = content.find("december") != -1 or title.find("december") != -1 or content.find(
-        "12/") != -1 or title.find("12/") != -1
+        "12/") != -1 or title.find("12/") != -1 or content.find(" dec ") != -1 or title.find(" dec ") != -1
     for kick_out_word in kick_out_words:
         if title.find(kick_out_word) != -1:
             return None
@@ -49,9 +77,9 @@ def scrape_post(url):
         return None
 
 
-def write_to_file(data):
+def write_to_file(data, folder="results/"):
     filename = strftime("%Y%m%d_data") + '.csv'
-    with open(filename, 'w', newline='\n', encoding="UTF-8") as f:
+    with open(folder + filename, 'w', newline='\n', encoding="UTF-8") as f:
         w = csv.writer(f, delimiter="\t")
         w.writerows(data)
 
@@ -70,6 +98,7 @@ def load_old_ids():
 
 def scrape_supost():
     old_ids = load_old_ids()
+    url_list = []
     results = []
     header = ["post_id", "link", "title", "content", "price", "quarter", "december"]
     results.append(header)
@@ -91,8 +120,10 @@ def scrape_supost():
             if res is None:
                 continue
             results.append(res)
+            url_list.append(post_url)
     write_to_file(results)
     write_old_ids(old_ids)
+    send_results(url_list)
 
 
 # Press the green button in the gutter to run the script.
