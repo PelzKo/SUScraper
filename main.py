@@ -1,10 +1,10 @@
 import csv
+import os
 import ast
 import smtplib, ssl
 import requests
 import helper
 from bs4 import BeautifulSoup
-from os.path import exists
 from time import strftime
 
 supost_baseurl = "https://supost.com"
@@ -78,6 +78,8 @@ def scrape_post(url):
 
 
 def write_to_file(data, folder="results/"):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
     filename = strftime("%Y%m%d_data") + '.csv'
     with open(folder + filename, 'w', newline='\n', encoding="UTF-8") as f:
         w = csv.writer(f, delimiter="\t")
@@ -90,7 +92,7 @@ def write_old_ids(old_ids):
 
 
 def load_old_ids():
-    if not exists(save_path):
+    if not os.path.exists(save_path):
         return set()
     with open(save_path, 'r') as f:
         return ast.literal_eval(f.read())
