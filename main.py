@@ -15,7 +15,7 @@ search_for = ["sublet", "sublease", "https://supost.com/search/sub/66", "rent", 
 
 config = helper.read_config()
 
-port = 587  # For starttls
+port = config['EmailSettings']['port'] #587  # For starttls
 smtp_server = config['EmailSettings']['smtp_server']
 sender_email = config['EmailSettings']['sender_email']
 receiver_email = config['EmailSettings']['receiver_email']
