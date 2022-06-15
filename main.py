@@ -105,7 +105,6 @@ def load_old_ids():
 
 
 def scrape_supost():
-    send_results(["dosgj", "sdgsdg"])
     old_ids = load_old_ids()
     url_list = []
     results = []
