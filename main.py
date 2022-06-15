@@ -6,6 +6,7 @@ import requests
 import helper
 from bs4 import BeautifulSoup
 from time import strftime
+from email.mime.text import MIMEText
 
 supost_baseurl = "https://supost.com"
 search_url = supost_baseurl + "/search?&q="
@@ -15,7 +16,7 @@ search_for = ["sublet", "sublease", "https://supost.com/search/sub/66", "rent", 
 
 config = helper.read_config()
 
-port = config['EmailSettings']['port'] #587  # For starttls
+port = config['EmailSettings']['port']  # 587  # For starttls
 smtp_server = config['EmailSettings']['smtp_server']
 sender_email = config['EmailSettings']['sender_email']
 receiver_email = config['EmailSettings']['receiver_email']
@@ -25,7 +26,12 @@ password = config['EmailSettings']['password']
 def send_results(data):
     if len(data) < 1:
         return None
-    message = "Hier die neuen, passenden Angebote:\n\n- " + '\n- '.join(data)
+    message = MIMEText("Hier die neuen, passenden Angebote:\n\n- " + '\n- '.join(data))
+
+    message['Subject'] = "SUPost Update"
+    message['From'] = sender_email
+    message['To'] = receiver_email
+
 
     context = ssl.create_default_context()
     with smtplib.SMTP(smtp_server, port) as server:
@@ -33,7 +39,7 @@ def send_results(data):
         server.starttls(context=context)
         server.ehlo()  # Can be omitted
         server.login(sender_email, password)
-        server.sendmail(sender_email, receiver_email, message)
+        server.sendmail(sender_email, [receiver_email], message.as_string())
 
 
 def return_soup(url):
@@ -99,6 +105,7 @@ def load_old_ids():
 
 
 def scrape_supost():
+    send_results(["dosgj", "sdgsdg"])
     old_ids = load_old_ids()
     url_list = []
     results = []
