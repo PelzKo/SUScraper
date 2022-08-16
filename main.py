@@ -10,7 +10,6 @@ from email.mime.text import MIMEText
 
 supost_baseurl = "https://supost.com"
 search_url = supost_baseurl + "/search?&q="
-save_path = '/home/konstip/SUScraper/seen_ids.txt'
 
 search_for = ["sublet", "sublease", "https://supost.com/search/sub/66", "rent", "sublicens", "https://supost.com/search/sub/59", "https://supost.com/search/cat/3"]
 
@@ -21,6 +20,11 @@ smtp_server = config['EmailSettings']['smtp_server']
 sender_email = config['EmailSettings']['sender_email']
 receiver_email = config['EmailSettings']['receiver_email']
 password = config['EmailSettings']['password']
+directory = config['LocalSettings']['path']
+if directory[-1] != "/":
+    directory = directory + "/"
+
+save_path = directory + "seen_ids.txt"
 
 
 def send_results(data):
@@ -84,7 +88,7 @@ def scrape_post(url):
         return None
 
 
-def write_to_file(data, folder="/home/konstip/SUScraper/results/"):
+def write_to_file(data, folder=directory+"results/"):
     if len(data) <= 1:
         return None
     if not os.path.exists(folder):

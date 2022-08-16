@@ -134,3 +134,6 @@ dmypy.json
 # Finished files
 results/
 seen_ids.txt
+
+# Config
+.configuration.ini

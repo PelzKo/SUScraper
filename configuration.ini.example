@@ -1,0 +1,9 @@
+[EmailSettings]
+port = X
+smtp_server = X
+sender_email = X
+receiver_email = X
+password = X
+
+[LocalSettings]
+path = X/
