@@ -10,9 +10,9 @@ from email.mime.text import MIMEText
 
 supost_baseurl = "https://supost.com"
 search_url = supost_baseurl + "/search?&q="
-save_path = 'seen_ids.txt'
+save_path = '/home/konstip/SUScraper/seen_ids.txt'
 
-search_for = ["sublet", "sublease", "https://supost.com/search/sub/66", "rent", "sublicens"]
+search_for = ["sublet", "sublease", "https://supost.com/search/sub/66", "rent", "sublicens", "https://supost.com/search/sub/59", "https://supost.com/search/cat/3"]
 
 config = helper.read_config()
 
@@ -62,15 +62,16 @@ def scrape_post(url):
     soup = return_soup(url)
     title = soup.find('h2', id="posttitle").text.strip().replace("\n", ". ").lower()
     content = soup.find('div', class_='post-text').text.strip().replace("\n", ". ").lower()
-    on_campus = content.find("on campus") != -1 or title.find("on campus") != -1
+    on_campus = content.find("menlo") != -1 or title.find("menlo") != -1 or content.find("palo") != -1 or title.find("palo") != -1
     price = soup.find("div", class_="item-price")
     if price is not None:
         price = price.contents[1].text
         try:
-            if price == "free" or float(price[1:].replace(",", "")) < 800:
+            if price == "free" or float(price[1:].replace(",", "")) < 800 or float(price[1:].replace(",","")) > 2500:
                 return None
         except ValueError as e:
-            print(e)
+            #print(e)
+            pass
     quarter = content.find("quarter") != -1 or title.find("quarter") != -1
     december = content.find("december") != -1 or title.find("december") != -1 or content.find(
         "12/") != -1 or title.find("12/") != -1 or content.find(" dec ") != -1 or title.find(" dec ") != -1
@@ -83,10 +84,12 @@ def scrape_post(url):
         return None
 
 
-def write_to_file(data, folder="results/"):
+def write_to_file(data, folder="/home/konstip/SUScraper/results/"):
+    if len(data) <= 1:
+        return None
     if not os.path.exists(folder):
         os.makedirs(folder)
-    filename = strftime("%Y%m%d_data") + '.csv'
+    filename = strftime("%Y%m%d-%H_data") + '.csv'
     with open(folder + filename, 'w', newline='\n', encoding="UTF-8") as f:
         w = csv.writer(f, delimiter="\t")
         w.writerows(data)
@@ -105,7 +108,6 @@ def load_old_ids():
 
 
 def scrape_supost():
-    send_results(["dosgj", "sdgsdg"])
     old_ids = load_old_ids()
     url_list = []
     results = []
@@ -120,7 +122,7 @@ def scrape_supost():
         links = soup.find_all('div', class_='one-result')
         for link in links:
             post_url = supost_baseurl + link.find("a").get("href")
-            print(post_url)
+            #print(post_url)
             post_id = post_url.split("/")[-1]
             if post_id in old_ids:
                 continue
