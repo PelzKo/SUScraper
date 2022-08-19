@@ -11,9 +11,6 @@ smtp_server = smtp.MySMTPServer.com
 sender_email = This.IsMy@Email.com
 receiver_email = This.IsMy@Email.com
 password = V3ryStronkhPa55word!
-
-[LocalSettings]
-path = /home/username/SUScraper/
 ```
 
 Have a cronjob call the main.py every X hours (I use two) and adjust the search criteria in the main.py to your needs

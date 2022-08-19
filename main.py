@@ -1,5 +1,6 @@
 import csv
 import os
+import pathlib
 import ast
 import smtplib, ssl
 import requests
@@ -19,12 +20,14 @@ port = config['EmailSettings']['port']  # 587  # For starttls
 smtp_server = config['EmailSettings']['smtp_server']
 sender_email = config['EmailSettings']['sender_email']
 receiver_email = config['EmailSettings']['receiver_email']
+if "," in receiver_email:
+    receiver_email = receiver_email.split(",")
+else:
+    receiver_email = [receiver_email]
 password = config['EmailSettings']['password']
-directory = config['LocalSettings']['path']
-if directory[-1] != "/":
-    directory = directory + "/"
+directory = pathlib.Path(__file__).parent.absolute()
 
-save_path = directory + "seen_ids.txt"
+save_path = os.path.join(directory, "seen_ids.txt")
 
 
 def send_results(data):
@@ -34,8 +37,7 @@ def send_results(data):
 
     message['Subject'] = "SUPost Update"
     message['From'] = sender_email
-    message['To'] = receiver_email
-
+    message['To'] = ", ".join(receiver_email)
 
     context = ssl.create_default_context()
     with smtplib.SMTP(smtp_server, port) as server:
@@ -43,7 +45,7 @@ def send_results(data):
         server.starttls(context=context)
         server.ehlo()  # Can be omitted
         server.login(sender_email, password)
-        server.sendmail(sender_email, [receiver_email], message.as_string())
+        server.sendmail(sender_email, receiver_email, message.as_string())
 
 
 def return_soup(url):
@@ -88,7 +90,7 @@ def scrape_post(url):
         return None
 
 
-def write_to_file(data, folder=directory+"results/"):
+def write_to_file(data, folder=os.path.join(directory, "results/")):
     if len(data) <= 1:
         return None
     if not os.path.exists(folder):
