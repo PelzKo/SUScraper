@@ -23,3 +23,6 @@ password = V3ryStronkhPa55word!
 ```
 
 Have a cronjob call the main.py every X hours (I use two) and adjust the search criteria in the main.py to your needs
+```
+0 */2 * * * python3 /home/user/SUScraper/main.py > /home/user/suscraper.log 2>&1
+```
