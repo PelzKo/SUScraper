@@ -33,7 +33,7 @@ save_path = os.path.join(directory, "seen_ids.txt")
 def send_results(data):
     if len(data) < 1:
         return None
-    message = MIMEText("Hier die neuen, passenden Angebote:\n\n- " + '\n- '.join(data))
+    message = MIMEText("Here is what I found:\n\n- " + '\n- '.join(data))
 
     message['Subject'] = "SUPost Update"
     message['From'] = sender_email
@@ -73,7 +73,7 @@ def scrape_post(url):
     if price is not None:
         price = price.contents[1].text
         try:
-            if price == "free" or float(price[1:].replace(",", "")) < 800 or float(price[1:].replace(",","")) > 2500:
+            if price == "free" or float(price[1:].replace(",", "")) < 800 or float(price[1:].replace(",","")) > 2700:
                 return None
         except ValueError as e:
             #print(e)
